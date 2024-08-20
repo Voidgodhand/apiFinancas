@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+   # Serviço para executar a API de finanças
+   apifinancas:
+      build:
+         context: .
+         dockerfile: Dockerfile
+      ports:
+         - "8083:8083"
+      depends_on:
+         - mysql
+         - rabbitmq
+         - mongodb
+      networks:
+         - mynetwork
+
+   # Serviço de banco de dados do MySQL
+   mysql:
+      image: mysql:8.0
+      container_name: mysql8-server
+      restart: always
+      ports:
+         - "3306:3306"
+      environment:
+         MYSQL_ROOT_PASSWORD: coti
+         MYSQL_DATABASE: bd_apifinancas
+         MYSQL_USER: meu_usuario
+         MYSQL_PASSWORD: senha123
+      volumes:
+         - mysql_data:/var/lib/mysql
+      networks:
+         - mynetwork
+
+   # Serviço para a mensageria do RabbitMQ
+   rabbitmq:
+      image: rabbitmq:3-management
+      ports:
+         - "5672:5672"
+         - "15672:15672"
+      networks:
+         - mynetwork         
+         
+   # Serviço para banco de dados do MongoDB
+   mongodb:
+      image: mongo:latest
+      ports:
+         - "27017:27017"
+      networks:
+         - mynetwork
+
+volumes:
+   mysql_data:
+      driver: local
+      
+networks:
+   mynetwork:
+      driver: bridge
